@@ -1,6 +1,5 @@
 package com.decode.gallery;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +13,9 @@ import android.widget.Button;
  */
 
 public class GalleryFragment extends Fragment  implements View.OnClickListener{
+
+    public static int TYPE_IMAGE = 0;
+    public static int TYPE_VIDEO = 1;
 
     private Button mPreviewButton;
 
