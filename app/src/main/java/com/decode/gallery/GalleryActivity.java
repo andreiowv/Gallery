@@ -102,8 +102,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
         mFAB.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
-                        .setAction("Action", new MyToast(getApplicationContext())).show();
+                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+                startActivityForResult(intent,2);
             }
         });
 
@@ -112,7 +112,12 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mPager.setCurrentItem(resultCode);
+        if(requestCode == 1)
+            mPager.setCurrentItem(resultCode);
+        else if (requestCode == 2) {
+            Snackbar.make((View) findViewById(R.id.my_FabParent), "Here's a Snackbar", Snackbar.LENGTH_LONG)
+                       .setAction("Action", new MyToast(getApplicationContext())).show();
+        }
 
     }
 
