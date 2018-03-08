@@ -1,6 +1,5 @@
 package com.decode.gallery;
 
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -33,7 +32,6 @@ public class GalleryFragment extends Fragment  implements View.OnClickListener{
         mRecy = root.findViewById(R.id.my_recycler_view);
         mRecy.setLayoutManager(new GridLayoutManager(getContext(), 3));
         mRecy.setAdapter(new Adapter(mType));
-        mRecy.addItemDecoration(new SpacesItemDecoration(10));
 
         return root;
     }
@@ -90,30 +88,6 @@ public class GalleryFragment extends Fragment  implements View.OnClickListener{
             return mMedia.length;
         }
     }
-
-    class SpacesItemDecoration extends RecyclerView.ItemDecoration {
-        private int space;
-
-        public SpacesItemDecoration(int space) {
-            this.space = space;
-        }
-
-        @Override
-        public void getItemOffsets(Rect outRect, View view,
-                                   RecyclerView parent, RecyclerView.State state) {
-            outRect.left = space;
-            outRect.right = space;
-            outRect.bottom = space;
-
-            // Add top margin only for the first item to avoid double space between items
-            if (parent.getChildLayoutPosition(view) == 0) {
-                outRect.top = space;
-            } else {
-                outRect.top = 0;
-            }
-        }
-    }
-
 
 }
 
