@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,6 +27,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     private DrawerLayout mDrawer;
     private NavigationView mNavigation;
     private FloatingActionButton mFAB;
+
 
 
 
@@ -136,8 +138,9 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     }
 
     @Override
-    public void preview(int type) {
+    public void preview(Media media) {
         Intent intent = new Intent(this, PreviewActivity.class);
+        intent.putExtra("color", media.getColor());
         startActivityForResult(intent, 1);
     }
 
@@ -158,4 +161,5 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
         }
         return true;
     }
+
 }

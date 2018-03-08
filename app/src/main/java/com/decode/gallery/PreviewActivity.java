@@ -7,32 +7,20 @@ import android.widget.Button;
 
 public class PreviewActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private Button mBack1Button, mBack2Button, mBack0Button;
+    private SquareRelativeLayout relativeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview);
+        relativeLayout = findViewById(R.id.preview_item);
+        relativeLayout.setBackgroundColor(getIntent().getExtras().getInt("color"));
 
-        mBack0Button = (Button) findViewById(R.id.button_back0);
-        mBack0Button.setOnClickListener(this);
-
-        mBack1Button = (Button) findViewById(R.id.button_back1);
-        mBack1Button.setOnClickListener(this);
-
-        mBack2Button = (Button) findViewById(R.id.button_back2);
-        mBack2Button.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        if(view.getId() == R.id.button_back0) {
-            setResult(0);
-        } else if (view.getId() == R.id.button_back1){
-            setResult(1);
-        } else if (view.getId() == R.id.button_back2) {
-            setResult(2);
-        }
+
         finish();
     }
 }

@@ -5,5 +5,5 @@ package com.decode.gallery;
  */
 
 public interface ICallback {
-    void preview(int type);
+    void preview(Media media);
 }
