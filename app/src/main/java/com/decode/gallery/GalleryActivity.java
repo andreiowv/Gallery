@@ -140,7 +140,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     @Override
     public void preview(Media media) {
         Intent intent = new Intent(this, PreviewActivity.class);
-        intent.putExtra("color", media.getColor());
+        intent.putExtra("color", "");
         startActivityForResult(intent, 1);
     }
 

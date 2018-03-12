@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".PreviewActivity"></activity>
-    </application>
 
+    </application>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 </manifest>
