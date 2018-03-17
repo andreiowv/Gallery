@@ -16,7 +16,7 @@ public class MyToast implements View.OnClickListener {
     }
     @Override
     public void onClick(View view) {
-        Toast toast = Toast.makeText(this.appContext, "Nice Toast", Toast.LENGTH_SHORT);
+        Toast toast = Toast.makeText(this.appContext, "Nice Toast", Toast.LENGTH_LONG);
         toast.show();
     }
 }

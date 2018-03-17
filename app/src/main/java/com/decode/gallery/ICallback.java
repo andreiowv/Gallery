@@ -6,4 +6,5 @@ package com.decode.gallery;
 
 public interface ICallback {
     void preview(Media media);
+    void showPermissions();
 }

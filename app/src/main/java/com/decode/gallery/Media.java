@@ -1,10 +1,13 @@
 package com.decode.gallery;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 
 import java.util.ArrayList;
@@ -43,6 +46,10 @@ public class Media {
     }
 
     public static List<Media> getMedia(int type, Context context) {
+
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+
+        }
         List<Media> ret = new ArrayList<>();
         Cursor cursor;
         Uri uri = MediaStore.Files.getContentUri("external");
