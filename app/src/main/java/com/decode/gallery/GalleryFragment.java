@@ -1,26 +1,16 @@
 package com.decode.gallery;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,7 +23,7 @@ import java.util.List;
  * Created by andrei on 28/02/2018.
  */
 
-public class GalleryFragment extends Fragment implements View.OnClickListener {
+public class GalleryFragment extends Fragment implements View.OnClickListener, Permissions.Callback {
 
     private int mType;
     private RecyclerView mRecy;
@@ -50,14 +40,13 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
         mRecy.setLayoutManager(new GridLayoutManager(getContext(), getResources().getInteger(R.integer.columns_port)));
 
-        checkPermission(new Runnable() {
-            @Override
-            public void run() {
-                loadAdapter();
-            }
-        });
+        load();
         return root;
     }
+    private void load() {
+        Permissions.check(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE, 555, this);
+    }
+
 
     @Override
     public void onClick(View view) {
@@ -73,41 +62,46 @@ public class GalleryFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == 555 && grantResults.length > 0 && grantResults[0]== PackageManager.PERMISSION_GRANTED) {
-            loadAdapter();
+        if(requestCode == 555)
+            Permissions.onPermissionsRequestResult(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE, permissions, grantResults, this);;
 
-        } else {
-            super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        }
-    }
 
-    private void checkPermission(final Runnable callback){
-        if(ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-            SharedPreferences prefs = getActivity().getSharedPreferences("PERMISSION_SHARED_PREFERENCES", Context.MODE_PRIVATE);
-            boolean wasRequested = prefs.getBoolean("requested_" + Manifest.permission.READ_EXTERNAL_STORAGE, false);
-            if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)){
-                Snackbar.make(getActivity().findViewById(R.id.my_FabParent), "Here's a Snackbar", Snackbar.LENGTH_LONG)
-                        .setAction("Action", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},555);
-                            }
-                        }).show();
-            } else if(!wasRequested){
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putBoolean("requested_" + Manifest.permission.READ_EXTERNAL_STORAGE, true);
-                editor.commit();
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},555);
-            } else {
-                ((ICallback) getActivity()).showPermissions();
-            }
-        } else {
-           callback.run();
-        }
     }
 
     private void loadAdapter(){
         mRecy.setAdapter(new Adapter(mType));
+    }
+
+    @Override
+    public void onPermissionNeedMoreInfo(String permission) {
+        Snackbar.make(getActivity().findViewById(R.id.my_FabParent), "Here's a Snackbar", Snackbar.LENGTH_LONG)
+                .setAction("Action", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Permissions.request(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE, 555);
+                    }
+                }).show();
+    }
+
+    @Override
+    public void onPermissionNeverAskAgain(String permission) {
+        Snackbar.make(getActivity().findViewById(R.id.my_FabParent), "Here's a Snackbar", Snackbar.LENGTH_LONG)
+                .setAction("Action", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Permissions.settings(getActivity());
+                    }
+                }).show();
+    }
+
+    @Override
+    public void onPermissionAllowed(String permission) {
+        loadAdapter();
+    }
+
+    @Override
+    public void onPermissionDenied(String permission) {
+
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

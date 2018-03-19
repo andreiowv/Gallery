@@ -1,8 +1,8 @@
 package com.decode.gallery;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -16,10 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -124,8 +121,9 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
         else if (requestCode == 2) {
             Snackbar.make((View) findViewById(R.id.my_FabParent), "Here's a Snackbar", Snackbar.LENGTH_LONG)
                        .setAction("Action", new MyToast(getApplicationContext())).show();
-        } else if (requestCode == 4) {
-            Log.d("VASILE", "ION");
+        } else if (requestCode == 555) {
+            for (Fragment f : getSupportFragmentManager().getFragments())
+                f.onActivityResult(requestCode, resultCode, data);
         }
 
     }
@@ -179,11 +177,17 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 555)
+        if (requestCode == 555) {
+            Permissions.reset();
             for (Fragment f : getSupportFragmentManager().getFragments())
                 f.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        else
+        } else
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Permissions.reset();
+    }
 }
