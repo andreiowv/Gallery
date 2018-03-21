@@ -1,5 +1,7 @@
 package com.decode.gallery;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,9 +19,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 
 
 public class GalleryActivity extends AppCompatActivity implements ICallback{
@@ -36,6 +40,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.activity_gallery);
 
         mToolbar = findViewById(R.id.toolbar);
@@ -111,6 +116,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
             }
         });
 
+
+
     }
 
 
@@ -142,11 +149,13 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
             mPager.setCurrentItem(savedInstanceState.getInt("type"));
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
-    public void preview(Media media) {
+    public void preview(Media media, View view) {
         Intent intent = new Intent(this, PreviewActivity.class);
-        intent.putExtra("color", "");
-        startActivityForResult(intent, 1);
+        intent.putExtra("media", media);
+        ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(this, view.findViewById(R.id.thumb), "thumbnail");
+        startActivityForResult(intent, 1, options.toBundle());
     }
 
     @Override

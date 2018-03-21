@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <com.decode.gallery.SquareRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_media"
     android:layout_width="match_parent"
@@ -8,7 +9,9 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/thumb"/>
+        android:id="@+id/thumb"
+        android:transitionName="thumbnail"
+        android:background="#ff0000"/>
     <TextView
         android:id="@+id/item_media_tv"
         android:layout_width="match_parent"
@@ -23,5 +26,10 @@
         android:textColor="#FFF"
         android:paddingEnd="8dp"
         android:textSize="15sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_ripple"/>
 
 </com.decode.gallery.SquareRelativeLayout>

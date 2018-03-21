@@ -53,7 +53,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener, P
         if (view.getTag() != null && view.getTag() instanceof Media) {
             if (getActivity() instanceof ICallback && !getActivity().isDestroyed() && !getActivity().isFinishing()) {
                 Media media = (Media) view.getTag();
-                ((ICallback) getActivity()).preview(media);
+                ((ICallback) getActivity()).preview(media, view);
             }
         }
 

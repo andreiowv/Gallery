@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:gravity="top|center"
     android:orientation="vertical"
     tools:context="com.decode.gallery.PreviewActivity">
 
@@ -12,5 +12,13 @@
     <com.decode.gallery.SquareRelativeLayout
         android:id="@+id/preview_item"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></com.decode.gallery.SquareRelativeLayout>
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/preview_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:transitionName="thumbnail"
+            android:background="#ff0000"/>
+    </com.decode.gallery.SquareRelativeLayout>
 </LinearLayout>

@@ -53,7 +53,10 @@
                 android:layout_alignParentRight="true"
                 android:layout_margin="16dp"
                 android:src="@drawable/ic_camera"
-                app:backgroundTint="@color/primaryColor" />
+                app:backgroundTint="@color/primaryColor"
+                app:rippleColor="@color/white"
+                android:background="@drawable/ic_ripple">
+            </android.support.design.widget.FloatingActionButton>
         </RelativeLayout>
     </FrameLayout>
 

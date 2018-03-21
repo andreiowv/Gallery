@@ -6,6 +6,8 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
@@ -17,7 +19,7 @@ import java.util.List;
  * Created by lucian.cioroga on 3/7/2018.
  */
 
-public class Media {
+public class Media implements Parcelable{
     public static final int TYPE_IMAGE = 0;
     public static final int TYPE_VIDEO = 1;
 
@@ -32,6 +34,26 @@ public class Media {
         mURI = url;
         mDuration = duration;
     }
+
+    protected Media(Parcel in) {
+        mType = in.readInt();
+
+        mDuration = in.readLong();
+        mURI = in.readString();
+        mName = in.readString();
+    }
+
+    public static final Creator<Media> CREATOR = new Creator<Media>() {
+        @Override
+        public Media createFromParcel(Parcel in) {
+            return new Media(in);
+        }
+
+        @Override
+        public Media[] newArray(int size) {
+            return new Media[size];
+        }
+    };
 
     public String getName() {
         return mName;
@@ -79,5 +101,18 @@ public class Media {
 
     public long getDuration() {
         return mDuration;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(mType);
+        parcel.writeLong(mDuration);
+        parcel.writeString(mURI);
+        parcel.writeString(mName);
     }
 }

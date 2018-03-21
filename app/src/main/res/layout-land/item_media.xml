@@ -8,7 +8,8 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/thumb"/>
+        android:id="@+id/thumb"
+        android:transitionName="thumbnail"/>
 
     <TextView
         android:id="@+id/item_media_tv"
@@ -24,5 +25,9 @@
         android:textColor="#FFF"
         android:paddingEnd="8dp"
         android:textSize="15sp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_ripple"/>
 
 </RelativeLayout>
