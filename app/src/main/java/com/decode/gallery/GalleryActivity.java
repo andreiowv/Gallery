@@ -2,7 +2,12 @@ package com.decode.gallery;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -19,11 +24,21 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.transition.Explode;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
 
 
 public class GalleryActivity extends AppCompatActivity implements ICallback{
@@ -33,12 +48,49 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     private DrawerLayout mDrawer;
     private NavigationView mNavigation;
     private FloatingActionButton mFAB;
+    private HashMap<String, Integer> mVisits;
+    private DB.Helper mDB;
+
 
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mDB = new DB.Helper(this);
+
+        if(savedInstanceState != null) {
+            mVisits = (HashMap<String, Integer>) savedInstanceState.getSerializable("mVisits");
+        } else {
+            mVisits = new HashMap<String, Integer>();
+            SQLiteDatabase db = mDB.getReadableDatabase();
+
+            Cursor cursor = db.rawQuery("SELECT * FROM " + DB.Visit.Entry.TABLE_NAME, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+
+                do {
+                    mVisits.put(cursor.getString(cursor.getColumnIndex(DB.Visit.Entry.COLUMN_URL)), cursor.getInt(cursor.getColumnIndex(DB.Visit.Entry.COLUMN_VISITS)));
+                } while (cursor.moveToNext());
+            }
+        
+//            try{
+//                File file = new File(getDir("data", MODE_PRIVATE), "data_filename");
+//                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file));
+//                mVisits = (HashMap<String, Integer>) inputStream.readObject();
+//                inputStream.close();
+//
+//            }catch (Exception e){
+//                Log.e("VASI", "Iesi acas citire", e);
+//            }
+
+//            SharedPreferences prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE);
+//            String s  = prefs.getString("visits", null);
+//            Gson gson = new Gson();
+//            mVisits = gson.fromJson(s, new TypeToken<HashMap<String, Integer>>(){}.getType());
+
+        }
+
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.activity_gallery);
@@ -123,16 +175,23 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 1)
-            mPager.setCurrentItem(resultCode);
-        else if (requestCode == 2) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1) {
+            if ( resultCode == RESULT_OK) {
+                Media media = data.getParcelableExtra("media");
+                int v = mVisits.containsKey(media.getUrl()) ? mVisits.get(media.getUrl()) : 0;
+                mVisits.put(media.getUrl(), v + 1);
+                for (Fragment f : getSupportFragmentManager().getFragments())
+                    f.onActivityResult(requestCode, resultCode, data);
+            }
+        } else if (requestCode == 2) {
             Snackbar.make((View) findViewById(R.id.my_FabParent), "Here's a Snackbar", Snackbar.LENGTH_LONG)
                        .setAction("Action", new MyToast(getApplicationContext())).show();
         } else if (requestCode == 555) {
             for (Fragment f : getSupportFragmentManager().getFragments())
                 f.onActivityResult(requestCode, resultCode, data);
-        }
 
+        }
     }
 
     @Override
@@ -140,6 +199,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
 
         super.onSaveInstanceState(outState);
         outState.putInt("type", mPager.getCurrentItem());
+        outState.putSerializable("mVisits", mVisits);
 
     }
 
@@ -199,4 +259,44 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
         super.onDestroy();
         Permissions.reset();
     }
+
+    @Override
+    public int getVisits(Media media) {
+        return mVisits.containsKey(media.getUrl()) ? mVisits.get(media.getUrl()) : 0;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        SharedPreferences prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE);
+//        prefs.edit().putString("visits", new Gson().toJson(mVisits)).commit();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SQLiteDatabase db = mDB.getReadableDatabase();
+        for (String key : mVisits.keySet()) {
+            ContentValues values = new ContentValues();
+            values.put(DB.Visit.Entry.COLUMN_URL, key);
+            values.put(DB.Visit.Entry.COLUMN_VISITS, mVisits.get(key));
+
+            if (db.update(DB.Visit.Entry.TABLE_NAME, values,
+                    DB.Visit.Entry.COLUMN_URL + "= ?", new String[]{key}) <= 0)
+                db.insert(DB.Visit.Entry.TABLE_NAME, null, values);
+
+        }
+//        try{
+//            File file = new File(getDir("data", MODE_PRIVATE), "data_filename");
+//            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
+//            outputStream.writeObject(mVisits);
+//            outputStream.flush();
+//            outputStream.close();
+//        }catch (Exception e){
+//            Log.e("VASI", "Iesi acas scriere", e);
+//        }
+    }
+
+
 }

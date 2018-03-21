@@ -1,6 +1,8 @@
 package com.decode.gallery;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +29,7 @@ public class GalleryFragment extends Fragment implements View.OnClickListener, P
 
     private int mType;
     private RecyclerView mRecy;
+
 
 
     @Nullable
@@ -104,16 +107,25 @@ public class GalleryFragment extends Fragment implements View.OnClickListener, P
 
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1
+                && resultCode == Activity.RESULT_OK)
+            mRecy.getAdapter().notifyDataSetChanged();
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
 
         public TextView mLabel;
         public ImageView mThumb;
+        private TextView mVisits;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             mLabel = itemView.findViewById(R.id.item_media_tv);
             mThumb = itemView.findViewById(R.id.thumb);
+            mVisits = itemView.findViewById(R.id.visits);
         }
     }
 
@@ -126,16 +138,15 @@ public class GalleryFragment extends Fragment implements View.OnClickListener, P
         public Adapter(int mType) {
             this.mType = mType;
             this.mMedia = Media.getMedia(mType, getContext());
+            if(this.mType == Media.TYPE_IMAGE){
+                mThumbs = new Picasso.Builder(getContext()).build();
+            } else {
+                mThumbs = new Picasso.Builder(getContext()).addRequestHandler(new VideoRequestHandler()).build();
+            }
         }
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            if(this.mType == Media.TYPE_IMAGE){
-                mThumbs = new Picasso.Builder(getContext()).build();
-            } else {
-               mThumbs = new Picasso.Builder(getContext()).addRequestHandler(new VideoRequestHandler()).build();
-            }
-
 
             LayoutInflater in = LayoutInflater.from(getContext());
             View v = in.inflate(R.layout.item_media, parent, false);
@@ -144,6 +155,10 @@ public class GalleryFragment extends Fragment implements View.OnClickListener, P
 
         @Override
         public void onBindViewHolder(ViewHolder vh, int position) {
+
+            ICallback gallery = (ICallback) getActivity();
+            vh.mVisits.setVisibility(gallery.getVisits(mMedia.get(position)) > 0 ? View.VISIBLE : View.GONE);
+            vh.mVisits.setText("" + gallery.getVisits(mMedia.get(position)));
             vh.itemView.setTag(mMedia.get(position));
             vh.itemView.setOnClickListener(GalleryFragment.this);
 

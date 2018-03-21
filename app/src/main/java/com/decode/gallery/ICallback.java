@@ -9,4 +9,6 @@ import android.view.View;
 public interface ICallback {
     void preview(Media media, View view);
     void showPermissions();
+    int getVisits(Media media);
+
 }

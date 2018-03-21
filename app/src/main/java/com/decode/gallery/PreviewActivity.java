@@ -1,16 +1,18 @@
 package com.decode.gallery;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-public class PreviewActivity extends AppCompatActivity implements View.OnClickListener{
+public class PreviewActivity extends AppCompatActivity{
 
     private SquareRelativeLayout relativeLayout;
     private ImageView previewThumb;
@@ -19,6 +21,7 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preview);
         supportPostponeEnterTransition();
@@ -68,9 +71,13 @@ public class PreviewActivity extends AppCompatActivity implements View.OnClickLi
                 });
     }
 
-    @Override
-    public void onClick(View view) {
 
-        finish();
+    @Override
+    public void finish() {
+        Intent result = new Intent();
+        result.putExtra("media", media);
+        setResult(RESULT_OK, result);
+        super.finish();
     }
+
 }
