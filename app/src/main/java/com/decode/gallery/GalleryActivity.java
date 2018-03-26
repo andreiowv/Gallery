@@ -73,7 +73,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
                     mVisits.put(cursor.getString(cursor.getColumnIndex(DB.Visit.Entry.COLUMN_URL)), cursor.getInt(cursor.getColumnIndex(DB.Visit.Entry.COLUMN_VISITS)));
                 } while (cursor.moveToNext());
             }
-        
+
 //            try{
 //                File file = new File(getDir("data", MODE_PRIVATE), "data_filename");
 //                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file));
