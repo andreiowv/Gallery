@@ -2,14 +2,16 @@ package com.decode.gallery;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -24,21 +26,16 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.crashlytics.android.Crashlytics;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
+
+import io.fabric.sdk.android.Fabric;
 
 
 public class GalleryActivity extends AppCompatActivity implements ICallback{
@@ -50,7 +47,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     private FloatingActionButton mFAB;
     private HashMap<String, Integer> mVisits;
     private DB.Helper mDB;
-
+    private Cloud mCloud;
+    private boolean mBound = false;
 
 
 
@@ -74,24 +72,10 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
                 } while (cursor.moveToNext());
             }
 
-//            try{
-//                File file = new File(getDir("data", MODE_PRIVATE), "data_filename");
-//                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file));
-//                mVisits = (HashMap<String, Integer>) inputStream.readObject();
-//                inputStream.close();
-//
-//            }catch (Exception e){
-//                Log.e("VASI", "Iesi acas citire", e);
-//            }
-
-//            SharedPreferences prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE);
-//            String s  = prefs.getString("visits", null);
-//            Gson gson = new Gson();
-//            mVisits = gson.fromJson(s, new TypeToken<HashMap<String, Integer>>(){}.getType());
-
         }
 
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.activity_gallery);
 
@@ -110,16 +94,24 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
         mPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                GalleryFragment fragment = new GalleryFragment();
-                Bundle args = new Bundle();
-                args.putInt("type", position);
-                fragment.setArguments(args);
-                return  fragment;
+                if(position == 2){
+                    CloudGalleryFragment cloudFragment = new CloudGalleryFragment();
+                    Bundle args = new Bundle();
+                    args.putInt("type", position);
+                    cloudFragment.setArguments(args);
+                    return cloudFragment;
+                } else {
+                    GalleryFragment fragment = new GalleryFragment();
+                    Bundle args = new Bundle();
+                    args.putInt("type", position);
+                    fragment.setArguments(args);
+                    return fragment;
+                }
             }
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
 
             @Override
@@ -130,6 +122,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
                     break;
                     case 1: ret = "Videos";
                     break;
+                    case 2: ret = "Cloud";
+                        break;
                 }
                 return ret;
             }
@@ -192,6 +186,13 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
                 f.onActivityResult(requestCode, resultCode, data);
 
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(this, Cloud.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -268,16 +269,8 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
     @Override
     protected void onPause() {
         super.onPause();
-//        SharedPreferences prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE);
-//        prefs.edit().putString("visits", new Gson().toJson(mVisits)).commit();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
         SQLiteDatabase db = mDB.getReadableDatabase();
-        for (String key : mVisits.keySet()) {
+        for(String key : mVisits.keySet()) {
             ContentValues values = new ContentValues();
             values.put(DB.Visit.Entry.COLUMN_URL, key);
             values.put(DB.Visit.Entry.COLUMN_VISITS, mVisits.get(key));
@@ -287,16 +280,53 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
                 db.insert(DB.Visit.Entry.TABLE_NAME, null, values);
 
         }
-//        try{
-//            File file = new File(getDir("data", MODE_PRIVATE), "data_filename");
-//            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
-//            outputStream.writeObject(mVisits);
-//            outputStream.flush();
-//            outputStream.close();
-//        }catch (Exception e){
-//            Log.e("VASI", "Iesi acas scriere", e);
-//        }
+//        SharedPreferences prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE);
+//        prefs.edit().putString("visits", new Gson().toJson(mVisits)).commit();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(mConnection);
+        mBound = false;
+    }
+
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//
+
+////        try{
+////            File file = new File(getDir("data", MODE_PRIVATE), "data_filename");
+////            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(file));
+////            outputStream.writeObject(mVisits);
+////            outputStream.flush();
+////            outputStream.close();
+////        }catch (Exception e){
+////            Log.e("VASI", "Iesi acas scriere", e);
+////        }
+//    }
+
+    private void onCloudReady() {
+        if (mCloud != null && mBound)
+            mCloud.fetch();
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            Cloud.CloudBinder binder = (Cloud.CloudBinder) service;
+            mCloud = (Cloud) binder.getService();
+            mBound = true;
+            onCloudReady();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
 }

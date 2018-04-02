@@ -30,7 +30,8 @@ public class PreviewActivity extends AppCompatActivity{
         media = getIntent().getParcelableExtra("media");
         if (media.getType() == Media.TYPE_IMAGE) {
             mThumbs = new Picasso.Builder(this).build();
-            mThumbs.load("file://" + media.getUrl()).fit().centerCrop().into(previewThumb, new Callback() {
+
+            mThumbs.load((!media.getUrl().contains("http") ?"file://" : "") + media.getUrl()).fit().centerCrop().into(previewThumb, new Callback() {
                 @Override
                 public void onSuccess() {
                     scheduleStartPostponedTransition(previewThumb);

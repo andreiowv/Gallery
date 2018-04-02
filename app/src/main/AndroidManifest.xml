@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.decode.gallery">
+    package="com.decode.gallery" android:versionCode="1" android:versionName="build 001">
 
     <application
         android:allowBackup="true"
@@ -18,7 +18,12 @@
         </activity>
         <activity android:name=".PreviewActivity"></activity>
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="0b1d913cd6290fd7c7bbadde9d58d17820215af3" />
+        <service android:name=".Cloud" />
     </application>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
