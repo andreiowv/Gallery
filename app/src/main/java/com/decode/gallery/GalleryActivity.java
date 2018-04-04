@@ -94,8 +94,14 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
         mPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
             public Fragment getItem(int position) {
-                if(position == 2){
+                if(position == 3){
                     CloudGalleryFragment cloudFragment = new CloudGalleryFragment();
+                    Bundle args = new Bundle();
+                    args.putInt("type", position);
+                    cloudFragment.setArguments(args);
+                    return cloudFragment;
+                } if (position == 2){
+                    SoundGalleryFragment cloudFragment = new SoundGalleryFragment();
                     Bundle args = new Bundle();
                     args.putInt("type", position);
                     cloudFragment.setArguments(args);
@@ -111,7 +117,7 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
 
             @Override
             public int getCount() {
-                return 3;
+                return 4;
             }
 
             @Override
@@ -122,7 +128,9 @@ public class GalleryActivity extends AppCompatActivity implements ICallback{
                     break;
                     case 1: ret = "Videos";
                     break;
-                    case 2: ret = "Cloud";
+                    case 2: ret = "Sounds";
+                    break;
+                    case 3: ret = "Cloud";
                         break;
                 }
                 return ret;

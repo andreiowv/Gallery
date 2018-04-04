@@ -22,17 +22,45 @@ import java.util.List;
 public class Media implements Parcelable{
     public static final int TYPE_IMAGE = 0;
     public static final int TYPE_VIDEO = 1;
+    public static final int TYPE_SOUND = 2;
 
     private String mName;
     private int mType;
     private String mURI;
     private long mDuration;
 
+    private String mArtist;
+    private String mAlbum;
+
     public Media(int type, long duration, String url, String title) {
         mType = type;
         mName = title;
         mURI = url;
         mDuration = duration;
+    }
+
+    public String getmArtist() {
+        return mArtist;
+    }
+
+    public void setmArtist(String mArtist) {
+        this.mArtist = mArtist;
+    }
+
+    public String getmAlbum() {
+        return mAlbum;
+    }
+
+    public void setmAlbum(String mAlbum) {
+        this.mAlbum = mAlbum;
+    }
+
+    public Media(int type, String title, String url, String artist, String album){
+        mType = type;
+        mName = title;
+        mAlbum = album;
+        mURI = url;
+        mArtist = artist;
     }
 
     protected Media(Parcel in) {
@@ -74,23 +102,36 @@ public class Media implements Parcelable{
         }
         List<Media> ret = new ArrayList<>();
         Cursor cursor;
-        Uri uri = MediaStore.Files.getContentUri("external");
+        Uri uri = type == TYPE_SOUND ? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI :MediaStore.Files.getContentUri("external");
+
         String[] projection = {
                 MediaStore.Files.FileColumns._ID, MediaStore.Files.FileColumns.DATA,
-                MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MEDIA_TYPE, MediaStore.Files.FileColumns.MIME_TYPE, MediaStore.Files.FileColumns.TITLE,
-                MediaStore.Video.Media.DURATION
+                MediaStore.Files.FileColumns.DATE_ADDED, MediaStore.Files.FileColumns.MIME_TYPE, MediaStore.Files.FileColumns.TITLE,
+                MediaStore.Video.Media.DURATION, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM
         };
 
-        String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + (type == TYPE_IMAGE ? MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-                : MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO);
-        CursorLoader cursorLoader = new CursorLoader(context, uri, projection, selection, null, MediaStore.Files.FileColumns.DATE_ADDED + " DESC");
+        String[] proj = {MediaStore.Files.FileColumns._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ARTIST};
+        String selection= null;
+
+        if (type == TYPE_IMAGE){
+           selection =  MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+        }else if (type == TYPE_VIDEO){
+            selection =  MediaStore.Files.FileColumns.MEDIA_TYPE + "=" + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
+        } else if (type == TYPE_SOUND) {
+            selection = MediaStore.Audio.Media.IS_MUSIC + "!=0";
+        }
+        CursorLoader cursorLoader = new CursorLoader(context, uri, type==TYPE_SOUND?proj:projection, selection, null, MediaStore.Files.FileColumns.DATE_ADDED + " DESC");
 
         cursor = cursorLoader.loadInBackground();
 
         cursor.moveToFirst();
 
         do {
-            ret.add(new Media(type, cursor.getLong(6), cursor.getString(1), cursor.getString(5)));
+            if(type == TYPE_SOUND){
+                ret.add(new Media(type, cursor.getString(1), cursor.getString(0), cursor.getString(2), cursor.getString(3)));
+            }else {
+                ret.add(new Media(type, cursor.getLong(5), cursor.getString(1), cursor.getString(4)));
+            }
         } while (cursor.moveToNext());
 
         cursor.close();
